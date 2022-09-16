@@ -17,7 +17,8 @@ model User {
   image    String?
   posts    Post[]
   comments Comment[]
-  likes    Like[]
+  postlikes    PostLike[]
+   commentlikes    CommentLike[]
 }
 
 model Post {
@@ -27,25 +28,32 @@ model Post {
   user     User?     @relation(fields: [usersId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   usersId  Int?
   comments Comment[]
-  likes    Like[]
+  postlikes    PostLike[]
 }
 
-model Like {
+model PostLike {
   id         Int      @id @default(autoincrement())
-  Posts      Post?    @relation(fields: [postsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  postsId    Int?
-  Comments   Comment? @relation(fields: [commentsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  commentsId Int?
-  users      User?    @relation(fields: [usersId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  usersId    Int
+  post      Post    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  postId    Int     @default(1)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    Int    @default(1)
 }
+
+model CommentLike{
+   id         Int      @id @default(autoincrement())
+  comments   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  commentId Int      @default(1)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    Int  @default(1)
+}
+
 
 model Comment {
   id      Int    @id @default(autoincrement())
   user    User   @relation(fields: [usersId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   message String
   usersId Int
-  likes   Like[]
+  commentlikes   CommentLike[]
   Post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   postId  Int
 }

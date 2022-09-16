@@ -17,12 +17,12 @@ app.get("/users", async (req, res) => {
       include: {
         posts: {
           include: {
-            likes: { select: { users: true } },
+            postlikes: { select: { user: true } },
             comments: {
               select: {
                 message: true,
                 user: true,
-                likes: { select: { users: true } },
+                commentlikes: { select: { user: true } },
               },
             },
           },
@@ -46,12 +46,12 @@ app.get("/users/:id", async (req, res) => {
       include: {
         posts: {
           include: {
-            likes: { select: { users: true } },
+            postlikes: { select: { user: true } },
             comments: {
               select: {
                 message: true,
                 user: true,
-                likes: { select: { users: true } },
+                commentlikes: { select: { user: true } },
               },
             },
           },
@@ -82,12 +82,12 @@ app.post("/post/:userId", async (req, res) => {
           include: {
             posts: {
               include: {
-                likes: { select: { users: true } },
+                postlikes: { select: { user: true } },
                 comments: {
                   select: {
                     message: true,
                     user: true,
-                    likes: { select: { users: true } },
+                    commentlikes: { select: { user: true } },
                   },
                 },
               },
@@ -105,14 +105,41 @@ app.post("/post/:userId", async (req, res) => {
 
 // like a comment or a post by user
 
-app.post("/likes", async (req, res) => {
+app.post("/postlikes", async (req, res) => {
   try {
-    const newpost = await prisma.like.create({
+    const newpost = await prisma.postLike.create({
       data: {
-        postsId: req.body.postsId,
-        commentsId: req.body.commentsId,
-        usersId: Number(req.body.usersId),
+        postId: req.body.postId,
+        userId: Number(req.body.userId),
       },
+      include: {
+        user: {
+          include: {
+            posts: {
+              include: {
+                postlikes: {select:{user:true}},
+                comments: { include: { commentlikes: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+    res.send(newpost.user);
+  } catch (error) {
+    //@ts-ignore
+    res.send({ error: error.message });
+  }
+});
+
+app.post("/commentlikes", async (req, res) => {
+  try {
+    const newpost = await prisma.commentLike.create({
+      data: {
+        commentId: req.body.commentId,
+        userId: Number(req.body.userId),
+      },
+      include: {},
     });
     res.send(newpost);
   } catch (error) {
